@@ -3,11 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ByteShalaDrop - Ultra Fast P2P</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>ByteShalaDrop | Ultra Fast P2P File Sharing</title>
+    <meta name="title" content="ByteShalaDrop | Ultra Fast P2P File Sharing">
+    <meta name="description" content="Transfer files directly between devices with zero cloud storage. Private, encrypted, and ultra-fast P2P sharing using simple 4-digit PINs.">
+    <meta name="theme-color" content="#020617">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://deepakgharti.com.np/">
+    <meta property="og:title" content="ByteShalaDrop | Ultra Fast P2P File Sharing">
+    <meta property="og:description" content="Secure, serverless P2P file transfers. No limits, just speed.">
+    <meta property="og:image" content="app.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="ByteShalaDrop | Ultra Fast P2P File Sharing">
+    <meta property="twitter:description" content="Secure, serverless P2P file transfers. No limits, just speed.">
+    <meta property="twitter:image" content="app.png">
+
+    <!-- Icons & PWA -->
+    <link rel="icon" type="image/png" href="fav.png">
+    <link rel="apple-touch-icon" href="app.png">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ByteShalaDrop%22,%22short_name%22:%22BSDrop%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#020617%22,%22theme_color%22:%22#22c55e%22,%22icons%22:[{%22src%22:%22app.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- PeerJS Library: No Firebase needed -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
 
@@ -16,174 +41,307 @@
 
         .mesh-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.15) 0, transparent 50%),
-                        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0, transparent 50%);
-            filter: blur(80px);
+            background: radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.12) 0, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.12) 0, transparent 50%),
+                        radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.08) 0, transparent 50%);
+            filter: blur(100px);
         }
 
         .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         .pin-input {
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .pin-input:focus {
             border-color: #22c55e;
-            background: rgba(34, 197, 94, 0.05);
+            background: rgba(34, 197, 94, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
             outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(34, 197, 94, 0.4);
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        .file-drop-area {
+            border: 2px dashed rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .file-drop-area.dragover {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .logo-img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            border-radius: 12px;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4">
+<body class="min-h-screen flex flex-col items-center">
     <div class="mesh-bg"></div>
 
-    <header class="fixed top-0 w-full p-4 sm:p-8 flex justify-between items-center z-50 bg-slate-950/50 backdrop-blur-md">
-        <div class="flex items-center gap-3">
-            <div class="bg-green-500 p-2 rounded-lg shadow-lg shadow-green-500/20">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 20v-8m0 0V4m0 8h8m-8 0H4"/></svg>
+    <!-- Header -->
+    <header class="fixed top-0 w-full p-5 sm:p-8 flex justify-between items-center z-50 transition-all duration-500" id="navbar">
+        <div class="flex items-center gap-4 group">
+            <div class="relative group-hover:scale-110 transition-transform duration-300">
+                <img src="app.png" alt="ByteShalaDrop Logo" class="logo-img shadow-xl shadow-green-500/20" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex'">
+                <div id="fallback-logo" class="hidden bg-green-500 p-2.5 rounded-xl items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 20v-8m0 0V4m0 8h8m-8 0H4"/></svg>
+                </div>
             </div>
             <div>
-                <h1 class="text-lg font-black text-white leading-none">ByteShala<span class="text-green-500">Drop</span></h1>
-                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Ultra-Fast P2P</p>
+                <h1 class="text-xl font-black text-white tracking-tight">ByteShala<span class="text-green-500">Drop</span></h1>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
+                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">P2P Protocol v2.0</p>
+                </div>
             </div>
         </div>
-        <div id="status-badge" class="glass-panel px-3 py-1.5 rounded-full flex items-center gap-2">
+        <div id="status-badge" class="glass-panel px-4 py-2 rounded-2xl flex items-center gap-2.5">
             <div id="status-dot" class="w-2 h-2 bg-slate-600 rounded-full"></div>
-            <span id="status-text" class="text-[9px] font-bold uppercase text-slate-400">Initializing...</span>
+            <span id="status-text" class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Initializing</span>
         </div>
     </header>
 
-    <main id="main-content" class="w-full max-w-lg mt-24 mb-24">
-        <div id="discovery-view" class="space-y-6">
-            <div class="glass-panel p-8 rounded-[2.5rem] text-center space-y-4">
-                <div class="flex flex-col items-center gap-2">
-                    <p class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Your Device PIN</p>
-                    <h2 id="my-pin-display" class="text-5xl font-black text-green-500 tracking-tighter">....</h2>
-                </div>
-                <div class="pt-4 border-t border-white/5">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Share this PIN to receive files</p>
+    <!-- Main Content -->
+    <main id="main-content" class="w-full max-w-lg mt-32 px-4 pb-32 animate__animated animate__fadeInUp">
+        <div id="discovery-view" class="space-y-8">
+            <!-- PIN Display Card -->
+            <div class="glass-panel p-10 rounded-[3rem] text-center relative overflow-hidden group">
+                <div class="absolute inset-0 shimmer opacity-50"></div>
+                <div class="relative z-10 space-y-4">
+                    <p class="text-[11px] font-black uppercase text-slate-500 tracking-[0.3em]">Your Receiving PIN</p>
+                    <div class="relative inline-block">
+                        <h2 id="my-pin-display" class="text-7xl font-black text-white tracking-tighter transition-all duration-500">
+                            <span class="text-slate-800 tracking-widest">....</span>
+                        </h2>
+                    </div>
+                    <div class="pt-6 flex flex-col items-center gap-2">
+                        <div class="flex items-center gap-2 text-green-500/60 text-[10px] font-bold uppercase tracking-widest">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            End-to-End Encrypted
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="glass-panel p-8 rounded-[2.5rem] space-y-6">
+            <!-- Connect Card -->
+            <div class="glass-panel p-10 rounded-[3rem] space-y-8">
                 <div class="text-center">
-                    <h3 class="text-lg font-black text-white">Connect to Peer</h3>
-                    <p class="text-xs text-slate-400">Enter the 4-digit PIN of the receiver.</p>
+                    <h3 class="text-xl font-black text-white mb-2">Send Files</h3>
+                    <p class="text-xs text-slate-400 font-medium">Enter the 4-digit PIN of the receiver</p>
                 </div>
                 
-                <div class="flex justify-center gap-3">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-3xl font-black text-white" id="p1">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-3xl font-black text-white" id="p2">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-3xl font-black text-white" id="p3">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-3xl font-black text-white" id="p4">
+                <div class="flex justify-center gap-4" id="pin-container">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p1">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p2">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p3">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p4">
                 </div>
 
-                <button id="connect-btn" class="w-full bg-green-500 text-black font-black py-5 rounded-2xl hover:bg-green-400 transition-all shadow-lg shadow-green-500/20">Connect & Send</button>
+                <button id="connect-btn" class="btn-primary w-full text-black font-black py-6 rounded-[2rem] text-lg flex items-center justify-center gap-3 active:scale-95">
+                    Connect Device
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                </button>
             </div>
         </div>
     </main>
 
-    <div id="transfer-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl">
-        <div class="w-full max-w-md glass-panel rounded-[3rem] p-10 text-center">
-            <div class="w-16 h-16 bg-green-500/20 text-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            </div>
-            <h2 id="modal-title" class="text-2xl font-black text-white mb-6">Connected</h2>
-            
-            <div id="progress-box" class="hidden mb-8 space-y-3">
-                <div class="flex justify-between text-[10px] font-black uppercase text-slate-400">
-                    <span id="transfer-status">Transferring...</span>
-                    <span id="progress-val">0%</span>
-                </div>
-                <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="h-full bg-green-500 w-0 transition-all"></div>
+    <!-- Footer Credit -->
+    <footer class="fixed bottom-0 w-full p-8 text-center bg-gradient-to-t from-slate-950 to-transparent">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+            Developed by 
+            <a href="https://deepakgharti.com.np/" target="_blank" class="text-green-500 hover:text-green-400 transition-colors underline decoration-2 underline-offset-4">Deepak Gharti</a>
+        </p>
+    </footer>
+
+    <!-- Transfer Overlay -->
+    <div id="transfer-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-2xl animate__animated animate__fadeIn">
+        <div class="w-full max-w-md glass-panel rounded-[3.5rem] p-12 text-center relative overflow-hidden">
+            <div id="connection-pulse" class="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 pulse-ring">
+                <div class="w-20 h-20 bg-green-500 text-black rounded-3xl flex items-center justify-center shadow-2xl shadow-green-500/40 overflow-hidden">
+                    <img src="app.png" alt="ByteShalaDrop" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('modal-fallback').style.display='block'">
+                    <svg id="modal-fallback" class="hidden" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                 </div>
             </div>
 
-            <button id="send-btn" class="w-full bg-white text-black font-black py-5 rounded-2xl hover:bg-slate-100 transition-all mb-4">Select Files</button>
-            <button onclick="location.reload()" class="text-xs font-bold text-red-400 uppercase tracking-widest">Disconnect</button>
+            <h2 id="modal-title" class="text-3xl font-black text-white mb-2 italic">Linking...</h2>
+            <p id="modal-subtitle" class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-10">Waiting for payload</p>
+            
+            <div id="progress-box" class="hidden mb-10 space-y-4">
+                <div class="flex justify-between items-end">
+                    <div class="text-left">
+                        <p id="transfer-status" class="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">Sending</p>
+                        <p id="file-name-display" class="text-sm font-bold text-white truncate w-48 text-left">filename.zip</p>
+                    </div>
+                    <span id="progress-val" class="text-2xl font-black text-white italic">0%</span>
+                </div>
+                <div class="h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <div id="action-zone" class="space-y-4">
+                <div id="drop-zone" class="file-drop-area rounded-[2.5rem] p-8 mb-6 cursor-pointer hover:bg-white/5 transition-all">
+                    <div class="space-y-3 pointer-events-none">
+                        <div class="text-slate-400">
+                             <svg class="mx-auto" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        </div>
+                        <p class="text-xs font-black text-white uppercase tracking-widest">Drop files or Click</p>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="w-full text-xs font-black text-red-500 uppercase tracking-[0.3em] hover:text-red-400 transition-colors">Terminate Link</button>
+            </div>
         </div>
     </div>
 
-    <input type="file" id="file-input" class="hidden">
+    <input type="file" id="file-input" class="hidden" multiple>
 
     <script>
+        // PWA & Service Worker Registration removed due to environment protocol restrictions on blob URLs for workers.
+        // Simplified app logic without SW for better compatibility in restricted environments.
+
         const myPin = Math.floor(1000 + Math.random() * 8999).toString();
-        const peer = new Peer(`bs-drop-${myPin}`);
+        const peer = new Peer(`bs-drop-${myPin}`, {
+            debug: 1
+        });
+        
         let activeConn = null;
 
+        // Initialization
         peer.on('open', (id) => {
-            $('#my-pin-display').text(myPin);
+            const pinDisplay = $('#my-pin-display');
+            pinDisplay.addClass('animate__animated animate__flipInX');
+            setTimeout(() => pinDisplay.html(myPin.split('').map(n => `<span>${n}</span>`).join('')), 400);
             updateStatus('Ready', 'bg-green-500');
         });
 
+        // Receiving Connection
         peer.on('connection', (conn) => {
             setupConnection(conn);
         });
 
+        // Connecting to Peer
         $('#connect-btn').on('click', () => {
             const enteredPin = $('#p1').val() + $('#p2').val() + $('#p3').val() + $('#p4').val();
-            if(enteredPin.length !== 4) return;
+            if(enteredPin.length !== 4) {
+                $('#pin-container').addClass('animate__animated animate__shakeX');
+                setTimeout(() => $('#pin-container').removeClass('animate__animated animate__shakeX'), 500);
+                return;
+            }
             
-            updateStatus('Connecting...', 'bg-yellow-500');
-            const conn = peer.connect(`bs-drop-${enteredPin}`, {
-                reliable: true
-            });
+            updateStatus('Handshaking...', 'bg-yellow-500');
+            const conn = peer.connect(`bs-drop-${enteredPin}`, { reliable: true });
             
-            conn.on('open', () => {
-                setupConnection(conn);
-            });
-
-            conn.on('error', (err) => {
-                alert("Could not find that device. Make sure it's open.");
-                updateStatus('Error', 'bg-red-500');
+            conn.on('open', () => setupConnection(conn));
+            conn.on('error', () => {
+                showToast("Target device not found or offline");
+                updateStatus('Ready', 'bg-green-500');
             });
         });
 
         function setupConnection(conn) {
             activeConn = conn;
             $('#transfer-modal').removeClass('hidden');
-            $('#modal-title').text('Connected to ' + conn.peer.replace('bs-drop-', ''));
-            updateStatus('Session Active', 'bg-blue-500');
+            $('#modal-title').text('Link Active');
+            $('#modal-subtitle').text('Connected to Device ' + conn.peer.replace('bs-drop-', ''));
+            updateStatus('Linked', 'bg-blue-500');
 
             conn.on('data', (data) => {
                 if (data.type === 'file-meta') {
                     window.incomingMeta = data;
                     window.receivedChunks = [];
                     window.receivedSize = 0;
-                    showProgress(true, 'Receiving ' + data.name);
+                    $('#file-name-display').text(data.name);
+                    showProgress(true, 'Receiving Payload');
                 } else if (data.type === 'file-chunk') {
                     window.receivedChunks.push(data.chunk);
                     window.receivedSize += data.chunk.byteLength;
-                    
                     const progress = Math.floor((window.receivedSize / window.incomingMeta.size) * 100);
                     updateProgressUI(progress);
 
                     if (window.receivedSize >= window.incomingMeta.size) {
-                        const blob = new Blob(window.receivedChunks);
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = window.incomingMeta.name;
-                        a.click();
-                        showProgress(false);
-                        updateStatus('Saved!', 'bg-green-500');
-                        window.receivedChunks = []; // Clear memory
+                        finalizeDownload();
                     }
                 }
             });
+
+            conn.on('close', () => {
+                showToast("Connection Lost");
+                setTimeout(() => location.reload(), 2000);
+            });
         }
 
-        $('#send-btn').on('click', () => $('#file-input').click());
+        function finalizeDownload() {
+            const blob = new Blob(window.receivedChunks);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = window.incomingMeta.name;
+            a.click();
+            showProgress(false);
+            updateStatus('Payload Saved', 'bg-green-500');
+            window.receivedChunks = [];
+            showToast("File received successfully!");
+        }
 
-        $('#file-input').on('change', function(e) {
-            const file = e.target.files[0];
+        // File Selection & Drag/Drop
+        $('#drop-zone').on('click', () => $('#file-input').click());
+        
+        const dz = document.getElementById('drop-zone');
+        dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+        dz.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dz.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        $('#file-input').on('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            const file = files[0];
             if (!file || !activeConn) return;
+
+            $('#file-name-display').text(file.name);
+            showProgress(true, 'Uplinking...');
 
             activeConn.send({
                 type: 'file-meta',
@@ -191,20 +349,13 @@
                 size: file.size
             });
 
-            showProgress(true, 'Optimizing Path...');
-            
-            // ULTRA FAST SETTINGS:
-            // 1. Larger Chunk Size (256KB instead of 16KB)
-            // 2. High-speed buffer management
-            const CHUNK_SIZE = 256 * 1024; 
-            const BUFFER_THRESHOLD = 2 * 1024 * 1024; // 2MB threshold
+            const CHUNK_SIZE = 164 * 1024; // Balanced for mobile & desktop
+            const BUFFER_THRESHOLD = 1024 * 1024;
             let offset = 0;
 
             const sendNextChunk = () => {
-                // Flow control: If PeerJS buffer is too full, wait a bit
-                // This prevents browser crashes and data loss while maintaining peak speed
                 if (activeConn.dataChannel.bufferedAmount > BUFFER_THRESHOLD) {
-                    setTimeout(sendNextChunk, 10);
+                    setTimeout(sendNextChunk, 16);
                     return;
                 }
 
@@ -221,21 +372,55 @@
                         updateProgressUI(Math.floor((offset / file.size) * 100));
                         
                         if (offset >= file.size) {
-                            setTimeout(() => showProgress(false), 500);
-                            updateStatus('Sent!', 'bg-green-500');
+                            setTimeout(() => {
+                                showProgress(false);
+                                updateStatus('Broadcast Complete', 'bg-green-500');
+                                showToast("Send complete!");
+                            }, 800);
                         } else {
-                            // Recursively call for next chunk
                             sendNextChunk();
                         }
                     };
                     reader.readAsArrayBuffer(slice);
-                    return; // Exit loop to wait for file read
+                    return;
                 }
             };
             
             sendNextChunk();
-        });
+        }
 
+        // UI Helpers
+        function updateProgressUI(p) {
+            $('#progress-bar').css('width', p + '%');
+            $('#progress-val').text(p + '%');
+        }
+
+        function showProgress(show, txt) {
+            if(show) { 
+                $('#progress-box').removeClass('hidden').addClass('animate__animated animate__fadeIn');
+                $('#drop-zone').addClass('hidden');
+                $('#transfer-status').text(txt);
+            } else {
+                $('#progress-box').addClass('hidden');
+                $('#drop-zone').removeClass('hidden');
+            }
+        }
+
+        function updateStatus(txt, color) {
+            $('#status-text').text(txt);
+            $('#status-dot').attr('class', `w-2 h-2 rounded-full ${color} pulse-ring`);
+        }
+
+        function showToast(msg) {
+            const toast = $(`<div class="fixed top-24 glass-panel px-6 py-3 rounded-full text-xs font-bold text-white z-[200] animate__animated animate__bounceInDown">${msg}</div>`);
+            $('body').append(toast);
+            setTimeout(() => {
+                toast.addClass('animate__bounceOutUp');
+                setTimeout(() => toast.remove(), 1000);
+            }, 3000);
+        }
+
+        // Pin Auto-focus logic
         $('.pin-input').on('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
             if (this.value.length === 1) $(this).next('.pin-input').focus();
@@ -243,20 +428,15 @@
             if(e.key === 'Backspace' && this.value === '') $(this).prev('.pin-input').focus();
         });
 
-        function updateProgressUI(p) {
-            $('#progress-bar').css('width', p + '%');
-            $('#progress-val').text(p + '%');
-        }
-
-        function showProgress(show, txt) {
-            if(show) { $('#progress-box').removeClass('hidden'); $('#transfer-status').text(txt); }
-            else { $('#progress-box').addClass('hidden'); }
-        }
-
-        function updateStatus(txt, color) {
-            $('#status-text').text(txt);
-            $('#status-dot').attr('class', `w-2 h-2 rounded-full ${color}`);
-        }
+        // Scroll effect for navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if(window.scrollY > 20) {
+                nav.classList.add('bg-slate-950/80', 'backdrop-blur-xl', 'py-4');
+            } else {
+                nav.classList.remove('bg-slate-950/80', 'backdrop-blur-xl', 'py-4');
+            }
+        });
     </script>
 </body>
 </html>

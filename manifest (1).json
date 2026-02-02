@@ -1,0 +1,32 @@
+{
+  "background_color": "#ffffff",
+  "description": "Transfer files directly between devices with zero cloud storage. Private, encrypted, and ultra-fast P2P sharing using simple 4-digit PINs.",
+  "dir": "ltr",
+  "display": "fullscreen",
+  "name": "share.nepalik.com",
+  "orientation": "any",
+  "scope": "https://share.nepalik.com.np",
+  "short_name": "share.nepalik.com",
+  "start_url": "/",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "https://share.nepalik.com.np/app.png",
+      "type": "image/png",
+      "sizes": "482x481",
+      "isSquare": false,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 482,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "lang": "en",
+  "display_override": [
+    "fullscreen",
+    "window-controls-overlay"
+  ]
+}

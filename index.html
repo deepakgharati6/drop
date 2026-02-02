@@ -4,39 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Primary Meta Tags -->
     <title>ByteShalaDrop | Ultra Fast P2P File Sharing</title>
-    <meta name="title" content="ByteShalaDrop | Ultra Fast P2P File Sharing">
     <meta name="description" content="Transfer files directly between devices with zero cloud storage. Private, encrypted, and ultra-fast P2P sharing using simple 4-digit PINs.">
     <meta name="theme-color" content="#020617">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://deepakgharti.com.np/">
-    <meta property="og:title" content="ByteShalaDrop | Ultra Fast P2P File Sharing">
-    <meta property="og:description" content="Secure, serverless P2P file transfers. No limits, just speed.">
-    <meta property="og:image" content="app.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="ByteShalaDrop | Ultra Fast P2P File Sharing">
-    <meta property="twitter:description" content="Secure, serverless P2P file transfers. No limits, just speed.">
-    <meta property="twitter:image" content="app.png">
-
-    <!-- Icons & PWA -->
-    <link rel="icon" type="image/png" href="app.png">
-    <link rel="apple-touch-icon" href="app.png">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22ByteShalaDrop%22,%22short_name%22:%22BSDrop%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#020617%22,%22theme_color%22:%22#22c55e%22,%22icons%22:[{%22src%22:%22app.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+    <!-- Manifest Link -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJ5dGVTaGFsYURyb3AiLAogICJzaG9ydF9uYW1lIjogIkJTRHJvcCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDIwNjE3IiwKICAidGhlbWVfY29sb3IiOiAiIzIyYzU1ZSIsCiAgImljb25zIjogW3sgInNyYyI6ICJhcHAucG5nIiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9wbmciIH0pCn0=">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="manifest" href="manifest.json">
-    <link rel="manifest" href="/app.webmanifest" crossorigin="use-credentials" />
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-
         :root { font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: #020617; color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
@@ -107,11 +88,15 @@
             background: rgba(34, 197, 94, 0.05);
         }
         
-        .logo-img {
-            width: 42px;
-            height: 42px;
-            object-fit: contain;
-            border-radius: 12px;
+        .logo-img { width: 42px; height: 42px; object-fit: contain; border-radius: 12px; }
+
+        /* PWA Install Banner Styles */
+        #pwa-install-banner {
+            transform: translateY(200%);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #pwa-install-banner.show {
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -122,7 +107,7 @@
     <header class="fixed top-0 w-full p-5 sm:p-8 flex justify-between items-center z-50 transition-all duration-500" id="navbar">
         <div class="flex items-center gap-4 group">
             <div class="relative group-hover:scale-110 transition-transform duration-300">
-                <img src="app.png" alt="ByteShalaDrop Logo" class="logo-img shadow-xl shadow-green-500/20" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex'">
+                <img src="app.png" alt="Logo" class="logo-img shadow-xl shadow-green-500/20" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex'">
                 <div id="fallback-logo" class="hidden bg-green-500 p-2.5 rounded-xl items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 20v-8m0 0V4m0 8h8m-8 0H4"/></svg>
                 </div>
@@ -150,7 +135,7 @@
                 <div class="relative z-10 space-y-4">
                     <p class="text-[11px] font-black uppercase text-slate-500 tracking-[0.3em]">Your Receiving PIN</p>
                     <div class="relative inline-block">
-                        <h2 id="my-pin-display" class="text-7xl font-black text-white tracking-tighter transition-all duration-500">
+                        <h2 id="my-pin-display" class="text-7xl font-black text-white tracking-tighter">
                             <span class="text-slate-800 tracking-widest">....</span>
                         </h2>
                     </div>
@@ -171,13 +156,13 @@
                 </div>
                 
                 <div class="flex justify-center gap-4" id="pin-container">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p1">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p2">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p3">
-                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-16 h-20 rounded-2xl text-center text-4xl font-black text-white" id="p4">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-4xl font-black text-white" id="p1">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-4xl font-black text-white" id="p2">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-4xl font-black text-white" id="p3">
+                    <input type="text" maxlength="1" inputmode="numeric" class="pin-input w-14 h-16 rounded-2xl text-center text-4xl font-black text-white" id="p4">
                 </div>
 
-                <button id="connect-btn" class="btn-primary w-full text-black font-black py-6 rounded-[2rem] text-lg flex items-center justify-center gap-3 active:scale-95">
+                <button id="connect-btn" class="btn-primary w-full text-black font-black py-5 rounded-[2rem] text-lg flex items-center justify-center gap-3 active:scale-95">
                     Connect Device
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
                 </button>
@@ -185,21 +170,36 @@
         </div>
     </main>
 
+    <!-- Custom PWA Install Pop-up -->
+    <div id="pwa-install-banner" class="fixed bottom-6 left-4 right-4 z-[200] max-w-md mx-auto">
+        <div class="glass-panel p-5 rounded-[2rem] flex items-center gap-4 shadow-2xl border-green-500/20">
+            <div class="bg-green-500 p-3 rounded-2xl shadow-lg shadow-green-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-black text-white leading-tight">Install ByteShalaDrop</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Faster access from home screen</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="install-close" class="px-3 py-2 text-slate-500 font-bold text-xs uppercase">Later</button>
+                <button id="install-confirm" class="bg-white text-black px-5 py-2 rounded-xl font-black text-xs uppercase">Install</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer Credit -->
     <footer class="fixed bottom-0 w-full p-8 text-center bg-gradient-to-t from-slate-950 to-transparent">
         <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
-            Developed by 
-            <a href="https://deepakgharti.com.np/" target="_blank" class="text-green-500 hover:text-green-400 transition-colors underline decoration-2 underline-offset-4">Deepak Gharti</a>
+            Developed by <a href="https://deepakgharti.com.np/" target="_blank" class="text-green-500 underline decoration-2 underline-offset-4">Deepak Gharti</a>
         </p>
     </footer>
 
     <!-- Transfer Overlay -->
-    <div id="transfer-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-2xl animate__animated animate__fadeIn">
-        <div class="w-full max-w-md glass-panel rounded-[3.5rem] p-12 text-center relative overflow-hidden">
-            <div id="connection-pulse" class="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 pulse-ring">
-                <div class="w-20 h-20 bg-green-500 text-black rounded-3xl flex items-center justify-center shadow-2xl shadow-green-500/40 overflow-hidden">
-                    <img src="app.png" alt="ByteShalaDrop" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('modal-fallback').style.display='block'">
-                    <svg id="modal-fallback" class="hidden" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <div id="transfer-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-2xl">
+        <div class="w-full max-w-md glass-panel rounded-[3.5rem] p-12 text-center relative">
+            <div class="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 pulse-ring">
+                <div class="w-20 h-20 bg-green-500 text-black rounded-3xl flex items-center justify-center shadow-2xl shadow-green-500/40">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                 </div>
             </div>
 
@@ -210,25 +210,25 @@
                 <div class="flex justify-between items-end">
                     <div class="text-left">
                         <p id="transfer-status" class="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">Sending</p>
-                        <p id="file-name-display" class="text-sm font-bold text-white truncate w-48 text-left">filename.zip</p>
+                        <p id="file-name-display" class="text-sm font-bold text-white truncate w-48">filename.zip</p>
                     </div>
                     <span id="progress-val" class="text-2xl font-black text-white italic">0%</span>
                 </div>
-                <div class="h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
-                    <div id="progress-bar" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full w-0 transition-all duration-300"></div>
+                <div class="h-3 bg-white/5 rounded-full overflow-hidden p-0.5">
+                    <div id="progress-bar" class="h-full bg-green-500 rounded-full w-0 transition-all duration-300"></div>
                 </div>
             </div>
 
             <div id="action-zone" class="space-y-4">
-                <div id="drop-zone" class="file-drop-area rounded-[2.5rem] p-8 mb-6 cursor-pointer hover:bg-white/5 transition-all">
+                <div id="drop-zone" class="file-drop-area rounded-[2.5rem] p-8 mb-6 cursor-pointer hover:bg-white/5">
                     <div class="space-y-3 pointer-events-none">
                         <div class="text-slate-400">
                              <svg class="mx-auto" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                         </div>
-                        <p class="text-xs font-black text-white uppercase tracking-widest">Drop files or Click</p>
+                        <p class="text-xs font-black text-white uppercase tracking-widest">Drop or Click</p>
                     </div>
                 </div>
-                <button onclick="location.reload()" class="w-full text-xs font-black text-red-500 uppercase tracking-[0.3em] hover:text-red-400 transition-colors">Terminate Link</button>
+                <button onclick="location.reload()" class="w-full text-xs font-black text-red-500 uppercase tracking-[0.3em]">Terminate Link</button>
             </div>
         </div>
     </div>
@@ -236,17 +236,45 @@
     <input type="file" id="file-input" class="hidden" multiple>
 
     <script>
-        // PWA & Service Worker Registration removed due to environment protocol restrictions on blob URLs for workers.
-        // Simplified app logic without SW for better compatibility in restricted environments.
+        // --- PWA INSTALL LOGIC ---
+        let deferredPrompt;
+        const installBanner = document.getElementById('pwa-install-banner');
 
-        const myPin = Math.floor(1000 + Math.random() * 8999).toString();
-        const peer = new Peer(`bs-drop-${myPin}`, {
-            debug: 1
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Show the custom banner after a short delay
+            setTimeout(() => {
+                installBanner.classList.add('show');
+            }, 3000);
         });
-        
+
+        document.getElementById('install-confirm').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                installBanner.classList.remove('show');
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+        });
+
+        document.getElementById('install-close').addEventListener('click', () => {
+            installBanner.classList.remove('show');
+        });
+
+        // Hide banner if already installed
+        window.addEventListener('appinstalled', (evt) => {
+            installBanner.classList.remove('show');
+            console.log('App installed successfully');
+        });
+
+        // --- P2P CORE LOGIC ---
+        const myPin = Math.floor(1000 + Math.random() * 8999).toString();
+        const peer = new Peer(`bs-drop-${myPin}`, { debug: 1 });
         let activeConn = null;
 
-        // Initialization
         peer.on('open', (id) => {
             const pinDisplay = $('#my-pin-display');
             pinDisplay.addClass('animate__animated animate__flipInX');
@@ -254,12 +282,8 @@
             updateStatus('Ready', 'bg-green-500');
         });
 
-        // Receiving Connection
-        peer.on('connection', (conn) => {
-            setupConnection(conn);
-        });
+        peer.on('connection', (conn) => setupConnection(conn));
 
-        // Connecting to Peer
         $('#connect-btn').on('click', () => {
             const enteredPin = $('#p1').val() + $('#p2').val() + $('#p3').val() + $('#p4').val();
             if(enteredPin.length !== 4) {
@@ -267,22 +291,20 @@
                 setTimeout(() => $('#pin-container').removeClass('animate__animated animate__shakeX'), 500);
                 return;
             }
-            
             updateStatus('Handshaking...', 'bg-yellow-500');
             const conn = peer.connect(`bs-drop-${enteredPin}`, { reliable: true });
-            
             conn.on('open', () => setupConnection(conn));
             conn.on('error', () => {
-                showToast("Target device not found or offline");
+                showToast("Target device offline");
                 updateStatus('Ready', 'bg-green-500');
             });
         });
 
         function setupConnection(conn) {
             activeConn = conn;
-            $('#transfer-modal').removeClass('hidden');
+            $('#transfer-modal').removeClass('hidden').addClass('animate__animated animate__fadeIn');
             $('#modal-title').text('Link Active');
-            $('#modal-subtitle').text('Connected to Device ' + conn.peer.replace('bs-drop-', ''));
+            $('#modal-subtitle').text('Linked: ' + conn.peer.replace('bs-drop-', ''));
             updateStatus('Linked', 'bg-blue-500');
 
             conn.on('data', (data) => {
@@ -291,22 +313,14 @@
                     window.receivedChunks = [];
                     window.receivedSize = 0;
                     $('#file-name-display').text(data.name);
-                    showProgress(true, 'Receiving Payload');
+                    showProgress(true, 'Receiving...');
                 } else if (data.type === 'file-chunk') {
                     window.receivedChunks.push(data.chunk);
                     window.receivedSize += data.chunk.byteLength;
                     const progress = Math.floor((window.receivedSize / window.incomingMeta.size) * 100);
                     updateProgressUI(progress);
-
-                    if (window.receivedSize >= window.incomingMeta.size) {
-                        finalizeDownload();
-                    }
+                    if (window.receivedSize >= window.incomingMeta.size) finalizeDownload();
                 }
-            });
-
-            conn.on('close', () => {
-                showToast("Connection Lost");
-                setTimeout(() => location.reload(), 2000);
             });
         }
 
@@ -318,79 +332,38 @@
             a.download = window.incomingMeta.name;
             a.click();
             showProgress(false);
-            updateStatus('Payload Saved', 'bg-green-500');
-            window.receivedChunks = [];
-            showToast("File received successfully!");
+            showToast("File Received!");
         }
 
-        // File Selection & Drag/Drop
+        // File Selection
         $('#drop-zone').on('click', () => $('#file-input').click());
-        
-        const dz = document.getElementById('drop-zone');
-        dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
-        dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-        dz.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dz.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-
         $('#file-input').on('change', (e) => handleFiles(e.target.files));
 
         function handleFiles(files) {
             const file = files[0];
             if (!file || !activeConn) return;
+            showProgress(true, 'Sending...');
+            activeConn.send({ type: 'file-meta', name: file.name, size: file.size });
 
-            $('#file-name-display').text(file.name);
-            showProgress(true, 'Uplinking...');
-
-            activeConn.send({
-                type: 'file-meta',
-                name: file.name,
-                size: file.size
-            });
-
-            const CHUNK_SIZE = 164 * 1024; // Balanced for mobile & desktop
-            const BUFFER_THRESHOLD = 1024 * 1024;
+            const CHUNK_SIZE = 16384 * 4;
             let offset = 0;
+            const reader = new FileReader();
 
-            const sendNextChunk = () => {
-                if (activeConn.dataChannel.bufferedAmount > BUFFER_THRESHOLD) {
-                    setTimeout(sendNextChunk, 16);
-                    return;
-                }
-
-                while (offset < file.size && activeConn.dataChannel.bufferedAmount < BUFFER_THRESHOLD) {
-                    const slice = file.slice(offset, offset + CHUNK_SIZE);
-                    const reader = new FileReader();
-                    
-                    reader.onload = (event) => {
-                        activeConn.send({
-                            type: 'file-chunk',
-                            chunk: event.target.result
-                        });
-                        offset += event.target.result.byteLength;
-                        updateProgressUI(Math.floor((offset / file.size) * 100));
-                        
-                        if (offset >= file.size) {
-                            setTimeout(() => {
-                                showProgress(false);
-                                updateStatus('Broadcast Complete', 'bg-green-500');
-                                showToast("Send complete!");
-                            }, 800);
-                        } else {
-                            sendNextChunk();
-                        }
-                    };
-                    reader.readAsArrayBuffer(slice);
-                    return;
-                }
+            const readNext = () => {
+                const slice = file.slice(offset, offset + CHUNK_SIZE);
+                reader.readAsArrayBuffer(slice);
             };
-            
-            sendNextChunk();
+
+            reader.onload = (e) => {
+                activeConn.send({ type: 'file-chunk', chunk: e.target.result });
+                offset += e.target.result.byteLength;
+                updateProgressUI(Math.floor((offset / file.size) * 100));
+                if (offset < file.size) readNext();
+                else setTimeout(() => showProgress(false), 500);
+            };
+            readNext();
         }
 
-        // UI Helpers
         function updateProgressUI(p) {
             $('#progress-bar').css('width', p + '%');
             $('#progress-val').text(p + '%');
@@ -398,7 +371,7 @@
 
         function showProgress(show, txt) {
             if(show) { 
-                $('#progress-box').removeClass('hidden').addClass('animate__animated animate__fadeIn');
+                $('#progress-box').removeClass('hidden');
                 $('#drop-zone').addClass('hidden');
                 $('#transfer-status').text(txt);
             } else {
@@ -409,34 +382,20 @@
 
         function updateStatus(txt, color) {
             $('#status-text').text(txt);
-            $('#status-dot').attr('class', `w-2 h-2 rounded-full ${color} pulse-ring`);
+            $('#status-dot').attr('class', `w-2 h-2 rounded-full ${color}`);
         }
 
         function showToast(msg) {
-            const toast = $(`<div class="fixed top-24 glass-panel px-6 py-3 rounded-full text-xs font-bold text-white z-[200] animate__animated animate__bounceInDown">${msg}</div>`);
+            const toast = $(`<div class="fixed top-24 glass-panel px-6 py-3 rounded-full text-xs font-bold text-white z-[300] animate__animated animate__bounceInDown">${msg}</div>`);
             $('body').append(toast);
-            setTimeout(() => {
-                toast.addClass('animate__bounceOutUp');
-                setTimeout(() => toast.remove(), 1000);
-            }, 3000);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        // Pin Auto-focus logic
         $('.pin-input').on('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
             if (this.value.length === 1) $(this).next('.pin-input').focus();
         }).on('keydown', function(e) {
             if(e.key === 'Backspace' && this.value === '') $(this).prev('.pin-input').focus();
-        });
-
-        // Scroll effect for navbar
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if(window.scrollY > 20) {
-                nav.classList.add('bg-slate-950/80', 'backdrop-blur-xl', 'py-4');
-            } else {
-                nav.classList.remove('bg-slate-950/80', 'backdrop-blur-xl', 'py-4');
-            }
         });
     </script>
 </body>

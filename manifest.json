@@ -3,11 +3,11 @@
   "description": "Transfer files directly between devices with zero cloud storage. Private, encrypted, and ultra-fast P2P sharing using simple 4-digit PINs.",
   "dir": "ltr",
   "display": "fullscreen",
-  "name": "share.nepalik.com",
+  "name": "ByteshalaDrop",
   "orientation": "any",
   "scope": "https://share.nepalik.com.np",
-  "short_name": "share.nepalik.com",
-  "start_url": "/",
+  "short_name": "BSD",
+  "start_url": "https://share.nepalik.com.np",
   "theme_color": "#020617",
   "icons": [
     {
